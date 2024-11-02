@@ -12,8 +12,9 @@ def main():
     Donald Trump has been holding an election night rally all night in North Carolina, via AP. He has been leading in the state, but early returns have not distinguished a front runner, says the NYT Needle, which puts NC at 60% for Trump.
     """
     live_summary = tester.get_ai_summary(prompt)
-
-    return render_template("main.html", live_summary=live_summary[0]["response"]["response"])
+    summary = live_summary[0]["response"]["response"]
+    htmlsummary = summary.replace("\n", "<br>")
+    return render_template("main.html", live_summary=htmlsummary)
 
 
     
