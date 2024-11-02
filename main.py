@@ -16,6 +16,16 @@ def main():
     htmlsummary = summary.replace("\n", "<br>")
     return render_template("main.html", live_summary=htmlsummary)
 
+updates = [
+    "Kamala Harris has gained support in the latest polls.",
+    "Donald Trump holds a strong lead in North Carolina.",
+    "The odds of a tie in the election have slightly increased."
+]
+
+@app.route('/get_updates')
+def get_updates():
+    # You can add logic to fetch new updates here
+    return jsonify(updates)
 
     
 if __name__ == "__main__":

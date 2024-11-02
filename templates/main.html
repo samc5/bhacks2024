@@ -16,7 +16,7 @@
             flex-direction: column; /* Stack children vertically */
         }
         h1 {
-            color: #007bff;
+            color: black;
         }
         .dialog-box {
             background: #ffffff;
@@ -67,7 +67,7 @@
 
 <div class="container-fluid flex-grow-1">
     <div class="row">
-        <div class="col-12 text-left mt-3">
+        <div class="col-12 text-left mt-3" style="background-color: grey;">
             <h1>2024 ELECTION</h1>
         </div>
     </div>
@@ -112,7 +112,9 @@
           <div class="col-md-3" style="height: 100vh;">
               <div class="dialog-box" style="height: 100%; overflow-y: auto; padding: 20px;">
                   <h4>Updates</h4>
-                  <p>This dialog box extends to the bottom of the page.</p>
+                  <div id = "updates-container">
+                     <p>This dialog box extends to the bottom of the page.</p>
+                  </div>
               </div>
 
               <div class="col-md-6 d-flex flex-column align-items-end">
@@ -129,9 +131,31 @@
       
   </div>
   
-  
-  
 </div>
+
+<!-- ajax -->
+<script>
+   function fetchUpdates() {
+       fetch('/get_updates')
+           .then(response => response.json())
+           .then(updates => {
+               const updatesContainer = document.getElementById('updates-container');
+               updatesContainer.innerHTML = ''; // Clear existing content
+
+               // Add each update as a new paragraph
+               updates.forEach(update => {
+                   const p = document.createElement('p');
+                   p.textContent = update;
+                   updatesContainer.appendChild(p);
+               });
+           })
+           .catch(err => console.error('Error fetching updates:', err));
+   }
+
+   // Fetch updates every 5 seconds (or however frequently you want)
+   setInterval(fetchUpdates, 5000);
+</script>
+
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
