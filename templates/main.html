@@ -61,6 +61,55 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* stuff for entries */
+        /* Styles for entries */
+      .first-entry {
+         background-color: #e0eafe; /* Desired color for the first entry */
+         border-radius: 10px; /* Rounded corners */
+         padding: 15px; /* Padding inside each entry */
+         margin-bottom: 10px; /* Space between entries */
+         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+         transition: all 0.3s ease; /* Smooth transition */
+      }
+
+      .entry {
+         background-color: #f8f4f1; /* Light background for other entries */
+         border-radius: 10px; /* Rounded corners */
+         padding: 15px; /* Padding inside each entry */
+         margin-bottom: 10px; /* Space between entries */
+         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+         transition: all 0.3s ease; /* Smooth transition */
+      }
+
+      .entry:hover,
+      .first-entry:hover {
+         transform: translateY(-5px); /* Slightly lift on hover */
+         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+      }
+
+      /* Optional styles for title, date, and summary */
+      .entry-title,
+      .first-entry .entry-title {
+         color: black; /* Color for the title */
+         font-weight: bold; /* Bold title */
+         font-size: 1.1em; /* Slightly larger font size for the title */
+         text-decoration: none; /* Remove underline from links */
+      }
+
+      .entry-date,
+      .first-entry .entry-date {
+         font-size: 0.8em; /* Smaller font size for the date */
+         color: #666; /* Gray color for the date */
+         margin: 5px 0; /* Space around the date */
+      }
+
+      .entry-summary,
+      .first-entry .entry-summary {
+         font-size: 0.9em; /* Regular font size for the summary */
+         color: #333; /* Dark gray for the summary text */
+      }
+
     </style>
 </head>
 <body>
@@ -112,7 +161,7 @@
           <div class="col-md-3" style="height: 100vh;">
               <div class="dialog-box" style="height: 100%; overflow-y: auto; padding: 20px;">
                   <h4>Updates</h4>
-                  <div id = "updates-container">
+                  <div id = "updates-container" class="flex-grow-1">
                      <p>This dialog box extends to the bottom of the page.</p>
                   </div>
               </div>
@@ -136,24 +185,49 @@
 <!-- ajax -->
 <script>
    function fetchUpdates() {
-       fetch('/get_updates')
-           .then(response => response.json())
-           .then(updates => {
-               const updatesContainer = document.getElementById('updates-container');
-               updatesContainer.innerHTML = ''; // Clear existing content
+      fetch('/get_updates')
+          .then(response => response.json())
+          .then(updates => {
+              const updatesContainer = document.getElementById('updates-container');
+              updatesContainer.innerHTML = ''; // Clear existing content
+  
+              updates.forEach((update, index) => {
+                  // Create a container div for each entry
+                  const entryDiv = document.createElement('div');
+                  entryDiv.className = index === 0 ? 'first-entry' : 'entry'; // Assign class based on index
+  
+                  // Title with link
+                  const titleLink = document.createElement('a');
+                  titleLink.href = update.link;
+                  titleLink.textContent = update.title;
+                  titleLink.target = '_blank'; // Open link in new tab
+                  titleLink.className = 'entry-title'; // Optional: Add class for title
+                  entryDiv.appendChild(titleLink);
+  
+                  // Date
+                  const date = document.createElement('p');
+                  date.textContent = `${update.date}`;
+                  date.className = 'entry-date'; // Optional: Add class for date
+                  entryDiv.appendChild(date);
+  
+                  // Summary
+                  const summary = document.createElement('p');
+                  summary.textContent = `${update.summary}`;
+                  summary.className = 'entry-summary'; // Optional: Add class for summary
+                  entryDiv.appendChild(summary);
+  
+                  // Append the entry div to the updates container
+                  updatesContainer.appendChild(entryDiv);
+              });
+          })
+          .catch(err => console.error('Error fetching updates:', err));
+  }
+  
+  fetchUpdates();
+  
 
-               // Add each update as a new paragraph
-               updates.forEach(update => {
-                   const p = document.createElement('p');
-                   p.textContent = update;
-                   updatesContainer.appendChild(p);
-               });
-           })
-           .catch(err => console.error('Error fetching updates:', err));
-   }
-
-   // Fetch updates every 5 seconds (or however frequently you want)
-   setInterval(fetchUpdates, 5000);
+   // Fetch updates every 20 seconds (or however frequently you want)
+   setInterval(fetchUpdates, 20000);
 </script>
 
 
