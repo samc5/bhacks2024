@@ -13,7 +13,7 @@ def main():
     """
     live_summary = tester.get_ai_summary(prompt)
 
-    return render_template("main.html", live_summary=live_summary)
+    return render_template("main.html", live_summary=live_summary[0]["response"]["response"])
 
 
     
