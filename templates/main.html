@@ -11,12 +11,14 @@
         /* Custom styles */
         body {
             background-color: #f8f9fa;
+            height: 100vh; /* Full height for the body */
+            display: flex; /* Use flex to create a column layout */
+            flex-direction: column; /* Stack children vertically */
         }
         h1 {
             color: #007bff;
         }
         .dialog-box {
-            height: 200px;
             background: #ffffff;
             border: 1px solid #007bff;
             padding: 20px;
@@ -36,68 +38,99 @@
             object-fit: cover; /* Cover the area without distortion */
         }
         .image-placeholder, .graph-placeholder {
-            height: 150px;
-            background: #e9ecef;
+            background: #ffffff;
             border: 1px solid #007bff;
+            padding: 20px;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6c757d;
-            font-size: 1.2em;
-        }
-        .image-placeholder {
-            background: url('https://via.placeholder.com/150.png?text=Images') no-repeat center;
-            background-size: contain;
-        }
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+         }
+
         .graph-placeholder {
             background: url('https://via.placeholder.com/150.png?text=Graph') no-repeat center;
             background-size: contain;
+        }
+        .flex-grow-1 {
+            flex-grow: 1; /* Allow dialog box to take remaining space */
+        }
+        .flex-row-wrap {
+            display: flex;
+            flex-wrap: wrap; /* Allow items to wrap */
+            justify-content: space-between; /* Space out items */
+        }
+        .flex-column {
+            display: flex;
+            flex-direction: column;
         }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
+<div class="container-fluid flex-grow-1">
     <div class="row">
         <div class="col-12 text-left mt-3">
             <h1>2024 ELECTION</h1>
         </div>
     </div>
     
-    <div class="row mt-4">
-        <div class="col-md-6 d-flex justify-content-center align-items-center">
-            <div class="dialog-box">
-                <h4>Dialog Box</h4>
-                <p>This is a dialog box located in the center middle. You can add more content here!</p>
-            </div>
-        </div>
-        
-        <div class="col-md-6 d-flex justify-content-center align-items-start">
-            <div class="dialog-box w-100">
-                <h4>Right Side Dialog Box</h4>
-                <p>This is a larger dialog box that takes most of the right side. Feel free to add more content here!</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-6 d-flex justify-content-center align-items-center">
-            <div class="map">
-                <img src="usmap.jpg" alt="Map of the USA"> <!-- Replace with your image path -->
-                <h5 class="text-center text-white" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);">Map of the USA</h5>
-            </div>
-        </div>
+    <div class="container-fluid flex-grow-1">
+      <div class="row">
+          <!-- Left Column -->
+          <div class="col-md-9">
+               
+            <div class = "row">
 
-        <div class="col-md-6 d-flex flex-column justify-content-end">
-            <div class="image-placeholder mb-2">
-                Images
+               <img src="eagle.jpg" alt="Image" style="width: 150px; height: auto; margin-right: 15px;"> 
+
+               <div class="dialog-box" style="padding: 20px; width: 70%">
+                     <h4>Top Dialog</h4>
+                     <p>This is the content of the top dialog box.</p>
+               </div>
+
             </div>
-            <div class="graph-placeholder">
-                Graph
-            </div>
-        </div>
-    </div>
+
+            <div class="map mb-2" style="width: auto; height:auto; padding: 40px; position: relative; background-color: #f8f9fa;"> <!-- Increased width and padding -->
+               <img src="usmap.jpg" alt="Map of the USA" style="width: 700px; height: auto;">
+               <h5 class="text-center text-black" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);">Map of the USA</h5>
+           </div>
+           
+           
+
+              <div class="image-placeholder mb-2">
+                  <h4>Swing States</h4>
+                  <p>Arizona <br>
+                     Georgia <br>
+                     Michigan <br>
+                     Nevada <br>
+                     North Carolina <br>
+                     Pennsylvania <br>
+                     Wisconsin</p>   
+               </div>
+          </div>
+          
+  
+          <!-- Right Column -->
+          <div class="col-md-3" style="height: 100vh;">
+              <div class="dialog-box" style="height: 100%; overflow-y: auto; padding: 20px;">
+                  <h4>Updates</h4>
+                  <p>This dialog box extends to the bottom of the page.</p>
+              </div>
+
+              <div class="col-md-6 d-flex flex-column align-items-end">
+               <div class="flex-grow-1"></div> <!-- This empty div pushes the graph to the bottom -->
+               <div class="graph-placeholder" style="height: 150px; width: 100%">
+                   Graph
+               </div>
+           </div>
+          </div>
+      </div>
+  </div>
+  
+
+      
+  </div>
+  
+  
+  
 </div>
 
 <!-- Bootstrap JS and dependencies -->
