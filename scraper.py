@@ -1,55 +1,48 @@
-import json
-import os
-import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import time
 
-def process_browser_logs_for_network_events(logs):
-    """Process browser logs and yield relevant network events."""
-    for entry in logs:
-        log = json.loads(entry["message"])["message"]
-        if "Network.response" in log["method"] or "Network.request" in log["method"]:
-            yield log
+# Configure Chrome options
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Run in headless mode
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
-def print_network_traffic(ap_url):
-    # Set Chrome options
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+# Enable network logging
+chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
-    # Add logging preferences directly to chrome options
-    chrome_options.add_experimental_option("w3c", False)
-    chrome_options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
-    chrome_options.add_experimental_option("loggingPrefs", {"performance": "ALL"})
+# Set up Chrome driver
+driver_path = "./chromedriver"  # Replace with your ChromeDriver path
+service = Service(driver_path)
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    # Specify the path to your ChromeDriver
-    homedir = os.path.expanduser("~")
-    webdriver_service = Service(f"{homedir}/chromedriver/stable/chromedriver")
+# Open the website
+url = "https://apnews.com/projects/election-results-2024/"
+driver.get(url)
 
-    # Create the WebDriver instance with options
-    browser = webdriver.Chrome(service=webdriver_service, options=chrome_options)
+# Give the page time to load requests
+time.sleep(10)  # Adjust as necessary based on network conditions
 
-    # Navigate to the URL
-    browser.get(ap_url)
+# Capture network logs and filter for JSON requests
+logs = driver.get_log("performance")
+json_urls = []
 
-    # Allow some time for the network events to be captured
-    time.sleep(5)
+for log in logs:
+    message = log["message"]
+    if "summary.json" in message or "metadata.json" in message:
+        # Parse the message to get the URL
+        start_idx = message.find("https://")
+        end_idx = message.find(".json") + len(".json")
+        json_url = message[start_idx:end_idx]
+        
+        if json_url not in json_urls:
+            json_urls.append(json_url)
 
-    # Fetch the performance logs
-    logs = browser.get_log("performance")
+# Output the URLs
+for url in json_urls:
+    print(url)
 
-    # Process and print the network events
-    for log in process_browser_logs_for_network_events(logs):
-        # Here we can print the entire log, or specific details
-        print(json.dumps(log, indent=2))  # Pretty-print the log entry
-
-    # Clean up
-    browser.quit()
-
-
-# Example usage
-game_url = "https://apnews.com/projects/election-results-2024/"  # Replace with the URL you want to inspect
-print_network_traffic(game_url)
+# Close the driver
+driver.quit()
