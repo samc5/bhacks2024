@@ -7,39 +7,91 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
     <style>
+      #map {
+         height: 390px; 
+         width: 85%; 
+         position: relative;
+         margin: 0 auto; /* Centers the map horizontally */
+         display: block; /* Ensures it's treated as a block-level element */
+     }
+     #alaska-map {
+      position: absolute;
+      bottom: 130px;
+      left: 80px;
+      height: 100px;
+      width: 100px;
+      z-index: 1000;
+      border: 2px solid #333; /* Border styling */
+      border-radius: 8px; /* Rounded corners */
+  }
+  #hawaii-map {
+      position: absolute;
+      bottom: 20px;
+      left: 100px;
+      height: 100px;
+      width: 100px;
+      z-index: 1000;
+      border: 2px solid #333; /* Border styling */
+      border-radius: 8px; /* Rounded corners */
+  }
+  .space-gradient {
+   width: auto;
+   height: auto;
+   padding: 40px;
+   position: relative;
+   text-align: center;
+   margin-top: 10px;
+   border-radius: 10px;
+   background: linear-gradient(to right, #000428, #884ff2, #000428); /* Dark to light to dark gradient */
+}
         /* Custom styles */
         body {
-            background-color: #f8f9fa;
-            height: 100vh; /* Full height for the body */
-            display: flex; /* Use flex to create a column layout */
-            flex-direction: column; /* Stack children vertically */
-        }
-        h1 {
-            color: black;
-        }
+         background: url('../static/starry.jpg') no-repeat center center fixed;
+         background-size: cover; /* Cover the entire area */
+         height: 100vh; /* Full height for the body */
+         display: flex; /* Use flex to create a column layout */
+         flex-direction: column; /* Stack children vertically */
+         position: relative; /* Needed for the overlay */
+         font-family: 'Fira Sans', sans-serif; /* Use Fira Sans font */
+     }
+     body::after {
+         content: '';
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background: rgba(69, 69, 69, 0.5); /* Dark overlay */
+         z-index: -1; /* Place behind content */
+     }
+
+     /* Adding some padding and height to allow scrolling */
+     .content {
+         padding: 20px;
+         height: 200vh; /* Increase height for scrolling */
+     }
+     
+     h1 {
+      color: black;
+      text-align: center; /* Center the text */
+  }
+  
         .dialog-box {
-            background: #ffffff;
-            border: 1px solid #007bff;
+            background: #2E294E;
+            border: 1px solid #060606;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+            color: white; /* Color for the title */
         }
-        .map {
-            height: 400px; /* Set height for the map */
-            border: 1px solid #007bff;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden; /* Hide overflow for better visual */
-        }
-        .map img {
-            width: 100%; /* Ensure the image covers the div */
-            height: 100%; /* Make the image fill the height */
-            object-fit: cover; /* Cover the area without distortion */
-        }
+      
         .image-placeholder, .graph-placeholder {
             background: #ffffff;
-            border: 1px solid #007bff;
+            border: 1px solid #060606;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -71,6 +123,7 @@
          margin-bottom: 10px; /* Space between entries */
          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
          transition: all 0.3s ease; /* Smooth transition */
+         
       }
 
       .entry {
@@ -115,12 +168,14 @@
 <body>
 
 <div class="container-fluid flex-grow-1">
-    <div class="row">
-        <div class="col-12 text-left mt-3" style="background-color: grey;">
-            <h1>2024 ELECTION</h1>
-        </div>
-    </div>
-    
+   <div class="row justify-content-center"> <!-- Center the row's content -->
+      <div class="mt-3" style="width: 80%; max-width: 600px; background-color: #f8f4f1; color: black; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); overflow: hidden; margin: 10px;">
+          <h1 style="margin: 0;">2024 ELECTION</h1> <!-- Set margin to zero for h1 -->
+      </div>
+  </div>
+  
+  </div>
+  
     <div class="container-fluid flex-grow-1">
       <div class="row">
           <!-- Left Column -->
@@ -128,33 +183,44 @@
                
             <div class = "row">
 
-               <img src="../static/eagle.jpg" alt="Image" style="width: 150px; height: auto; margin-right: 15px;"> 
+               <img src="../static/murica.jpg" alt="Image" style="width: 200px; height: auto; margin-right: 15px;"> 
 
-               <div class="dialog-box" style="padding: 20px; width: 70%">
-                     <h4>Top Dialog</h4>
+               <div class="dialog-box" style="padding: 20px; width: 70%; font-size = 24px">
+                     <h4>Freedom Speech</h4>
                         <p id="summary-container">{{live_summary | safe}}</p>
                      <!-- <p>{{live_summary | safe}}.</p> -->
                </div>
 
             </div>
 
-            <div class="map mb-2" style="width: auto; height:auto; padding: 40px; position: relative; background-color: #f8f9fa;"> <!-- Increased width and padding -->
-               <img src="../static/usmap.jpg" alt="Map of the USA" style="width: 700px; height: auto;">
-               <h5 class="text-center text-black" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);">Map of the USA</h5>
+            <div class="map mb-2 space-gradient">
+
+               <div id="map" style = "border-radius: 10px;"></div>
+               <div id="alaska-map"></div>
+<div id="hawaii-map"></div>
            </div>
            
            
 
-              <div class="image-placeholder mb-2">
-                  <h4>Swing States</h4>
-                  <p>Arizona <br>
-                     Georgia <br>
-                     Michigan <br>
-                     Nevada <br>
-                     North Carolina <br>
-                     Pennsylvania <br>
-                     Wisconsin</p>   
-               </div>
+           <div class="row mb-2"> <!-- Create a row for the flex items -->
+            <div class="col-md-6 d-flex flex-column align-items-start image-placeholder"> <!-- Adjusted to column layout -->
+                <h4>Swing States</h4>
+                <p>Arizona <br>
+                   Georgia <br>
+                   Michigan <br>
+                   Nevada <br>
+                   North Carolina <br>
+                   Pennsylvania <br>
+                   Wisconsin</p>   
+            </div>
+        
+            <div class="col-md-6 d-flex flex-column align-items-end">
+                <div class="graphy" style="height: 500px; width: 100%; max-width: 600px;">
+                    <iframe src="https://www.metaculus.com/questions/embed/11245?theme=dark&embedTitle=Who+will+be+elected+US+President+in+2024%3F&zoom=1w" style="height: 100%; width: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+        
           </div>
           
   
@@ -167,12 +233,7 @@
                   </div>
               </div>
 
-              <div class="col-md-6 d-flex flex-column align-items-end">
-               <div class="flex-grow-1"></div> <!-- This empty div pushes the graph to the bottom -->
-               <div class="graph-placeholder" style="height: 150px; width: 100%">
-                   Graph
-               </div>
-           </div>
+           
           </div>
       </div>
   </div>
@@ -221,6 +282,19 @@
               });
           })
           .catch(err => console.error('Error fetching updates:', err));
+
+         
+
+  }
+  function fetchSummary() {
+        console.log("getting the summary");
+      fetch('/get_summary')
+          .then(response => response.json())
+          .then(summary => {
+              const summaryContainer = document.getElementById('summary-container');
+              summaryContainer.innerHTML = summary;
+          })
+          .catch(err => console.error('Error fetching summary:', err));
   }
   function fetchSummary() {
         console.log("getting the summary");
@@ -241,10 +315,223 @@
   setInterval(fetchSummary, 30000);
 </script>
 
+<script>
+   function fetchVotes() {
+      fetch('/get_votes')
+         .then(response => response.json())
+         .then(data => {
+            // Assuming data is an array of {state, color} objects
+            // Example: data = [{state: 'California', color: '#884ff2'}, {state: 'Texas', color: '#ff5733'}, ...]
+
+            // Fetch the GeoJSON data for U.S. states
+            fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
+               .then(response => response.json())
+               .then(geoData => {
+                  // Function to create styles based on state configurations
+                  function getStyle(state) {
+                     const config = data.find(item => item.state === state);
+                     if (config) {
+                        return { color: config.color, weight: 1, fillOpacity: 0.9 };
+                     }
+                     return { fillColor: 'transparent', weight: 0 };
+                  }
+
+                  // Clear existing GeoJSON layers before adding new ones
+                  map.eachLayer(layer => {
+                     if (layer instanceof L.GeoJSON) {
+                        map.removeLayer(layer);
+                     }
+                  });
+                  alaskaMap.eachLayer(layer => {
+                     if (layer instanceof L.GeoJSON) {
+                        alaskaMap.removeLayer(layer);
+                     }
+                  });
+                  hawaiiMap.eachLayer(layer => {
+                     if (layer instanceof L.GeoJSON) {
+                        hawaiiMap.removeLayer(layer);
+                     }
+                  });
+
+                  // Add the new GeoJSON layers with updated styles
+                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(map);
+                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(hawaiiMap);
+                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(alaskaMap);
+               })
+               .catch(err => console.error(err));
+         })
+         .catch(err => console.error(err));
+   }
+  
+   fetchVotes();
+   
+   // Fetch updates every 20 seconds (or however frequently you want)
+   setInterval(fetchVotes, 20000);
+</script>
+
+<script>
+   function fetchVotes() {
+      fetch('/get_votes')
+         .then(response => response.json())
+         .then(data => {
+            // Assuming data is an array of {state, color} objects
+            // Example: data = [{state: 'California', color: '#884ff2'}, {state: 'Texas', color: '#ff5733'}, ...]
+
+            // Fetch the GeoJSON data for U.S. states
+            fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
+               .then(response => response.json())
+               .then(geoData => {
+                  // Function to create styles based on state configurations
+                  function getStyle(state) {
+                     const config = data.find(item => item.state === state);
+                     if (config) {
+                        return { color: config.color, weight: 1, fillOpacity: 0.9 };
+                     }
+                     return { fillColor: 'transparent', weight: 0 };
+                  }
+
+                  // Clear existing GeoJSON layers before adding new ones
+                  map.eachLayer(layer => {
+                     if (layer instanceof L.GeoJSON) {
+                        map.removeLayer(layer);
+                     }
+                  });
+                  alaskaMap.eachLayer(layer => {
+                     if (layer instanceof L.GeoJSON) {
+                        alaskaMap.removeLayer(layer);
+                     }
+                  });
+                  hawaiiMap.eachLayer(layer => {
+                     if (layer instanceof L.GeoJSON) {
+                        hawaiiMap.removeLayer(layer);
+                     }
+                  });
+
+                  // Add the new GeoJSON layers with updated styles
+                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(map);
+                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(hawaiiMap);
+                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(alaskaMap);
+               })
+               .catch(err => console.error(err));
+         })
+         .catch(err => console.error(err));
+   }
+  
+   fetchVotes();
+   
+   // Fetch updates every 20 seconds (or however frequently you want)
+   setInterval(fetchVotes, 20000);
+</script>
+
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Initialize the main map
+    var map = L.map('map', {
+        center: [37.8, -96], 
+        zoom: 4, 
+        scrollWheelZoom: false, 
+        dragging: false, 
+        touchZoom: false, 
+        doubleClickZoom: false,
+        attributionControl: false
+    });
+
+    // Add OpenStreetMap tile layer to the main map
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    
+    // Alaska inset map
+    var alaskaMap = L.map('alaska-map', {
+      center: [64.2008, -149.4937],
+      zoom: 2, // Zoom out to see more of Alaska
+      dragging: false,
+      touchZoom: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      zoomControl: false,
+      attributionControl: false
+  });
+
+  // Add OpenStreetMap tile layer to Alaska map
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+  }).addTo(alaskaMap);
+
+  // Hawaii inset map
+  var hawaiiMap = L.map('hawaii-map', {
+      center: [20.7967, -158.3319],
+      zoom: 4,
+      dragging: false,
+      touchZoom: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      zoomControl: false,
+      attributionControl: false
+  });
+
+  // Add OpenStreetMap tile layer to Hawaii map
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+  }).addTo(hawaiiMap);
+
+
+    // Load GeoJSON for U.S. states and apply styles
+    
+
+    fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
+    .then(response => response.json())
+    .then(data => {
+        // Define a function to style states based on their names
+        function styleStates(feature) {
+            const stateConfigurations = [{ state: 'California', color: '#884ff2' }];
+            const name = feature.properties.name;
+            const config = stateConfigurations.find(item => item.state === name);
+
+            if (config) {
+                return { color: config.color, weight: 1, fillOpacity: 0.9 };
+            }
+            return { fillColor: 'transparent', weight: 0 };
+        }
+
+        // Add GeoJSON layer to the map with the defined styling
+        L.geoJSON(data, { style: styleStates }).addTo(map);
+        L.geoJSON(data, {style: styleStates}).addTo(hawaiiMap);
+        L.geoJSON(data, {style: styleStates}).addTo(alaskaMap);
+    })
+    .catch(err => console.error(err));
+
+   
+
+
+    // Load GeoJSON for neighboring countries (Mexico, Canada, etc.)
+    fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson')
+    .then(response => response.json())
+    .then(data => {
+        function styleMexico(feature) {
+            const name = feature.properties.name;
+            if (['Mexico', 'Bahamas', 'Cuba', 'Dominican Rep.', 'Canada'].includes(name)) {
+                return { color: '#a8d3df', weight: 2, fillOpacity: 1 };
+            }
+            return { fillColor: 'transparent', weight: 0 };
+        }
+        L.geoJSON(data, { style: styleMexico }).addTo(map);
+    })
+    .catch(err => console.error(err));
+
+    // Remove zoom control from the main map
+    map.zoomControl.remove();
+
+</script>
+
+
 </body>
 </html>
