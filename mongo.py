@@ -100,7 +100,7 @@ def get_candidate_percentage(candidate_id, state):
     #the candidate_id is the same across the three functions
 
     def get_candidate_proportion(votecount, totalcount):
-        return round(abs((votecount[0] / totalcount)), 2) if totalcount != 0 else 0.5
+        return round(abs((votecount[0] / totalcount)), 2) if totalcount != 0 else 0
 
     return (get_candidate_proportion(get_candidate_votes(candidate_id, state), get_total_votes(candidate_id, state)), state)
 
