@@ -22,7 +22,7 @@ def metaculus():
     # Check if the request was successful
     if response.status_code == 200:
         question_data = response.json()
-
+    #     print(question_data)
         # print(question_data)
         print("Failed to fetch question data:", response.status_code)
 
