@@ -70,18 +70,18 @@ def get_votes():
     result = []
     print(result)
     
-    for state in states[:5]:
+    for state in states:
         blue = mongo.get_candidate_percentage("Kamala Harris", state)[0]
-        print(blue)
+        
         
         color = rgbToHex(get_color(blue))
         result.append((state_name(state), color))
         
-    print(result)
+    print(f"Result: {result}")
     
     final = [{"state": state, "color": color} for state, color in result]
-    print(jsonify(result))
-    return jsonify(result)
+    print(jsonify(final))
+    return jsonify(final)
 
 
 

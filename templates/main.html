@@ -185,7 +185,7 @@
 
                <img src="../static/murica.jpg" alt="Image" style="width: 200px; height: auto; margin-right: 15px;"> 
 
-               <div class="dialog-box" style="padding: 20px; width: 70%; font-size = 24px">
+               <div class="dialog-box" style="padding: 20px; width: 70%; font-size: 24px">
                      <h4>Freedom Speech</h4>
                      <p>{{live_summary | safe}}.</p>
                </div>
@@ -291,53 +291,44 @@
   
 
    // Fetch updates every 20 seconds (or however frequently you want)
-   setInterval(fetchUpdates, 20000);
+   setInterval(fetchUpdates, 10000);
 </script>
 
 <script>
    function fetchVotes() {
-      Promise.all([
-               fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson')
-                  .then(response => response.json()),
-               fetch('/get_votes')
-                  .then(response => response.json())
-            ])
-            .then(([geoData, data]) => {
-               // Here you can access both countriesData and votesData
-               console.log(geoData); // Log the countries GeoJSON data
-               console.log(data); // Log the votes data
+      return Promise.all([
+        fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
+          .then(response => response.json()),
+        fetch('/get_votes')
+          .then(response => response.json())
+      ])
+      .then(([geoData, data]) => {
+        console.log(geoData); // Log the states GeoJSON data
+        console.log(data); // Log the votes data
 
-            // Fetch the GeoJSON data for U.S. stfetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
-    
-   
         // Function to create styles based on state configurations
-                // Define a function to style states based on their names
-                function styleStates(feature) {
-                    var name = feature.properties.name; // Get the state name
-                    for (var i = 0; i < data.length; i++) {
-                        if (data[i][0] === name) { // Check if the state matches
-                            return { color: data[i][1], weight: 1, fillOpacity: 0.9 }; // Return the style
-                        }
-                    }
-                    return { fillColor: 'transparent', weight: 0 }; // Default style
-                }
-                
-                L.geoJSON(geoData, { style: styleStates }).addTo(map);
-                L.geoJSON(geoData, { style: styleStates }).addTo(hawaiiMap);
-                L.geoJSON(geoData, { style: styleStates }).addTo(alaskaMap);
+        function styleStates(feature) {
+          var name = feature.properties.name; // Get the state name
+          for (var i = 0; i < data.length; i++) {
+            if (data[i][0] === name) { // Check if the state matches
+              return { color: data[i][1], weight: 1, fillOpacity: 0.9 }; // Return the style
+            }
+          }
+          return { fillColor: 'transparent', weight: 0 }; // Default style
+        }
 
+        // Add GeoJSON layer to the maps
+        L.geoJSON(geoData, { style: styleStates }).addTo(map);
+        L.geoJSON(geoData, { style: styleStates }).addTo(hawaiiMap);
+        L.geoJSON(geoData, { style: styleStates }).addTo(alaskaMap);
 
-
-        
-    })
-    .catch(err => console.error(err));
-
-   }
-  
-   fetchVotes();
+        return data; // Return the data
+      })
+      .catch(err => console.error(err));
+    }
    
    // Fetch updates every 20 seconds (or however frequently you want)
-   setInterval(fetchVotes, 20000);
+   setInterval(fetchVotes, 10000);
 </script>
 
 
@@ -365,7 +356,6 @@
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    
     // Alaska inset map
     var alaskaMap = L.map('alaska-map', {
       center: [64.2008, -149.4937],
@@ -376,79 +366,88 @@
       doubleClickZoom: false,
       zoomControl: false,
       attributionControl: false
-  });
+    });
 
-  // Add OpenStreetMap tile layer to Alaska map
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-  }).addTo(alaskaMap);
+    // Add OpenStreetMap tile layer to Alaska map
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(alaskaMap);
 
-  // Hawaii inset map
-  var hawaiiMap = L.map('hawaii-map', {
-      center: [20.7967, -158.3319],
-      zoom: 4,
-      dragging: false,
-      touchZoom: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      zoomControl: false,
-      attributionControl: false
-  });
+    // Hawaii inset map
+    var hawaiiMap = L.map('hawaii-map', {
+        center: [20.7967, -158.3319],
+        zoom: 4,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        zoomControl: false,
+        attributionControl: false
+    });
 
-  // Add OpenStreetMap tile layer to Hawaii map
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-  }).addTo(hawaiiMap);
+    // Add OpenStreetMap tile layer to Hawaii map
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(hawaiiMap);
 
+    // Function to fetch votes data
+    async function fetchVotes() {
+      try {
+        const response = await fetch('/get_votes');
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    }
 
     // Load GeoJSON for U.S. states and apply styles
-    
-
     fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
     .then(response => response.json())
-    .then(data => {
-      console.log(data)
-        // Define a function to style states based on their names
-        function styleStates(feature) {
-            const stateConfigurations = [{ state: 'California', color: '#884ff2' }];
-            const name = feature.properties.name;
-            const config = stateConfigurations.find(item => item.state === name);
+    .then(async data => {
+      console.log(data);
 
-            if (config) {
-                return { color: config.color, weight: 1, fillOpacity: 0.9 };
-            }
-            return { fillColor: 'transparent', weight: 0 };
+      // Fetch state configurations
+      const stateConfigurations = await fetchVotes();
+      console.log(stateConfigurations);
+
+      // Define a function to style states based on their names
+      function styleStates(feature) {
+        const name = feature.properties.name;
+        const config = stateConfigurations.find(item => item.state === name);
+
+        if (config) {
+          return { color: config.color, weight: 1, fillOpacity: 0.9 };
         }
+        return { fillColor: 'transparent', weight: 0 };
+      }
 
-        // Add GeoJSON layer to the map with the defined styling
-        L.geoJSON(data, { style: styleStates }).addTo(map);
-        L.geoJSON(data, {style: styleStates}).addTo(hawaiiMap);
-        L.geoJSON(data, {style: styleStates}).addTo(alaskaMap);
+      // Add GeoJSON layer to the map with the defined styling
+      L.geoJSON(data, { style: styleStates }).addTo(map);
+      L.geoJSON(data, { style: styleStates }).addTo(hawaiiMap);
+      L.geoJSON(data, { style: styleStates }).addTo(alaskaMap);
     })
     .catch(err => console.error(err));
-
-   
-
 
     // Load GeoJSON for neighboring countries (Mexico, Canada, etc.)
     fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson')
     .then(response => response.json())
     .then(data => {
-        function styleMexico(feature) {
-            const name = feature.properties.name;
-            if (['Mexico', 'Bahamas', 'Cuba', 'Dominican Rep.', 'Canada'].includes(name)) {
-                return { color: '#a8d3df', weight: 2, fillOpacity: 1 };
-            }
-            return { fillColor: 'transparent', weight: 0 };
+      function styleMexico(feature) {
+        const name = feature.properties.name;
+        if (['Mexico', 'Bahamas', 'Cuba', 'Dominican Rep.', 'Canada'].includes(name)) {
+          return { color: '#a8d3df', weight: 2, fillOpacity: 1 };
         }
-        L.geoJSON(data, { style: styleMexico }).addTo(map);
+        return { fillColor: 'transparent', weight: 0 };
+      }
+      L.geoJSON(data, { style: styleMexico }).addTo(map);
     })
     .catch(err => console.error(err));
 
     // Remove zoom control from the main map
     map.zoomControl.remove();
-
-</script>
+  </script>
 
 
 </body>
