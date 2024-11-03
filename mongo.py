@@ -3,6 +3,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os, json, requests
 from bson import ObjectId
+from mongoadd import *
 # set a string equal to the contents of mongodbpassword.txt
 load_dotenv()
 connection_string = os.getenv("MONGO")
@@ -21,21 +22,13 @@ states = [
 ]
 
 
-def add_feed(input_data, state):
-    uri = connection_string
-    client = MongoClient(uri)
-    db = client["Election"]
-    collection = db["States"]
-    try:
-        collection.replace_one({state: input_data[state]}, input_data, upsert=True)
-        print("Input data upserted successfully.")
-    except Exception as e:
-        print("An error occurred:", e)
+def add_feed():
+    add_new_election_data()
 
 # Call the function to execute it
 # add_feed()
 
-def get_feed(state):
+def get_feed(state=None):
     uri = connection_string
     client = MongoClient(uri)
     db = client["Election"]
@@ -43,14 +36,17 @@ def get_feed(state):
     
     try:
         # Find documents based on the state
-        documents = collection.find({"statePostal": state})
+        if state is None:
+            documents = collection.find()
+        else:
+            documents = collection.find({"statePostal": state})
         # Print each document
+        
         return documents
     except Exception as e:
         print("An error occurred:", e)
 
 
-# get_feed()
 
 def delete_feed():
     uri = connection_string
@@ -71,6 +67,9 @@ def delete_feed():
 def get_candidate_percentage(candidate_id, state):
     if state not in states:
         print("Invalid state code")
+        return 0
+    if candidate_id not in candidate_ids and candidate_id not in candidate_ids.values():
+        print("Invalid candidate ID")
         return 0
     def get_candidate_info(candidate_id, state):
         try:
