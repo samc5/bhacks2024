@@ -24,10 +24,11 @@ def add_feed(input_data):
 # add_feed()
 
 def get_feed():
+    
     uri = connection_string
     client = MongoClient(uri)
     db = client["Election"]
-    collection = db["test"]
+    collection = db["States"]
     
     try:
         # Find all documents in the collection
@@ -56,3 +57,5 @@ def delete_feed():
         print("An error occurred:", e)
 # delete_feed()
 # get_feed()
+
+get_feed()
