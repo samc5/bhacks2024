@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 import os, time
 # MongoDB connection
 load_dotenv()
-connection_string = os.getenv("MONGO")
-uri = "mongodb+srv://samc5:RKM0gSD6Z6GAbjHB@election.xtda8.mongodb.net/?retryWrites=true&w=majority&appName=Election&tls=true"
+connection_string = os.getenv("MONGO2")
+uri = "mongodb+srv://samcowan1968:VtEVUM30MpuPRKDZ@2020.3f92k.mongodb.net/?retryWrites=true&w=majority&appName=2020"
 client = MongoClient(uri)
-db = client["Election"]
+db = client["2020"]
 collection = db["States"]
 
 # List of state abbreviations
@@ -21,8 +21,8 @@ states = [
 
 # Base URL format
 def add_new_election_data():
-    base_url = "https://interactives.apelections.org/election-results/data-live/2024-11-05/results/races/{}/20241105{}0/metadata.json"
-    base_url2 = "https://interactives.apelections.org/election-results/data-live/2024-11-05/results/races/{}/20241105{}0/summary.json"
+    base_url = "https://interactives.apelections.org/election-results/data-live/2020-11-03/results/races/{}/20201103{}0/metadata.json"
+    base_url2 = "https://interactives.apelections.org/election-results/data-live/2020-11-03/results/races/{}/20201103{}0/summary.json"
     for state in states:
         url = base_url.format(state, state)  # Generate the URL for the current state
         url2 = base_url2.format(state, state)
@@ -37,8 +37,9 @@ def add_new_election_data():
             filter = {"statePostal": state}
             filter2 = {"statePostal": state}
             # Insert JSON data into MongoDB
-            collection.replace_one(filter, json_data)
-            collection.replace_one(filter2, json_data2)
+            collection.replace_one(filter, json_data, upsert=True)
+            collection.replace_one(filter2, json_data2, upsert=True)
+            print(json_data, json_data2)
             print(f"Data from {url} added to MongoDB successfully!")
 
         except requests.exceptions.RequestException as e:
