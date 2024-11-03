@@ -5,6 +5,7 @@ import feedparse
 import json
 from collections import deque
 import mongo
+import requests
 
 app = Flask(__name__)
 
@@ -22,8 +23,7 @@ def metaculus():
     if response.status_code == 200:
         question_data = response.json()
 
-        # print(question_data)
-    else:
+        # print(question_data)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
         print("Failed to fetch question data:", response.status_code)
 
 
@@ -47,7 +47,7 @@ def main():
 def get_updates():
     # You can add logic to fetch new updates here
     
-    return jsonify(feedparse.grab_feed())
+    return jsonify(feedparse.grab_feed(feeds))
 
 @app.route('/get_votes')
 def get_votes():
