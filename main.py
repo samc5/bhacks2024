@@ -1,5 +1,6 @@
 # Flask app with one endpoint
 from flask import Flask, jsonify, request, render_template
+from flask_cors import CORS
 import tester
 import feedparse
 import json
@@ -8,11 +9,44 @@ import mongo
 import requests
 
 app = Flask(__name__)
+CORS(app)
 
-feeds = ['https://rss.app/feeds/hrPniMrzl8h6wTuh.xml', 'https://feeds.npr.org/1014/rss.xml', 'https://rss.app/feeds/nfQP0BJQ8amXIx94.xml', 'https://rss.politico.com/politics-news.xml', 'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml', 'https://rss.app/feeds/pYL0Ocz6xle7OWp1.xml', 'https://rss.app/feeds/VhAOOiFwbGFd4WlF.xml', 'https://www.natesilver.net/feed', 'https://rss.app/feeds/BXihygZ4d2NKfzPW.xml', 'https://centerforpolitics.org/crystalball/feed/', 'https://rss.app/feeds/h5Tu1PAwpnnM1qmI.xml', 'https://rss.app/feeds/HJEKIUADv4wOdVjJ.xml', 'https://rss.app/feeds/lEjDG1mAtpWKTp7q.xml', 'https://rss.app/feeds/mEa6aVrq00pYzudF.xml']
+feeds = ['https://feeds.npr.org/1014/rss.xml', 'https://rss.politico.com/politics-news.xml', 'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml', 'https://rss.app/feeds/pYL0Ocz6xle7OWp1.xml', 'https://rss.app/feeds/VhAOOiFwbGFd4WlF.xml', 'https://www.natesilver.net/feed', 'https://rss.app/feeds/BXihygZ4d2NKfzPW.xml', 'https://centerforpolitics.org/crystalball/feed/', 'https://rss.app/feeds/h5Tu1PAwpnnM1qmI.xml', 'https://rss.app/feeds/lEjDG1mAtpWKTp7q.xml', 'https://rss.app/feeds/mEa6aVrq00pYzudF.xml']
 # cache = deque(maxlen=5) 
+states = [
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+]
 
+state_mapping = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+    "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
+    "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
+    "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada",
+    "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
+    "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+    "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
+    "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
+    "WI": "Wisconsin", "WY": "Wyoming"
+}
+def get_color(value):
+    if value < 0 or value > 1:
+        raise ValueError("Value must be between 0 and 1.")
+    blue = int(value * 255)
+    red = int((0.98 - value) * 255)
+    return (red, 0, blue)
 
+def rgbToHex(rgb):
+    return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
+def state_name(abbreviation):
+    return state_mapping.get(abbreviation, "Unknown State")
 def metaculus():
     # question_id = 12345  # example question ID
     url = f"https://www.metaculus.com/api2/questions/11245/"
@@ -43,6 +77,21 @@ def main():
     htmlsummary = summary.replace("\n", "<br>")
     return render_template("main.html", live_summary=htmlsummary)
 
+@app.route("/get_other")
+def get_other():
+    result = []
+    
+    for state in states:
+        blue = mongo.get_candidate_percentage("Joe Biden", state)[0]
+        color = rgbToHex(get_color(blue))
+        result.append((state_name(state), color))
+        print(len(result))
+        
+    print(f"Result: {result}")
+    #generate a map based on the results
+
+
+
 @app.route("/get_updates")
 def get_updates():
     # You can add logic to fetch new updates here
@@ -52,42 +101,7 @@ def get_updates():
 @app.route('/get_votes')
 def get_votes():
     print("IM WORKING")
-    states = [
-        "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
-        "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-        "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-        "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-        "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
-    ]
-    
-    state_mapping = {
-        "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
-        "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
-        "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
-        "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
-        "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
-        "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
-        "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada",
-        "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
-        "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
-        "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
-        "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
-        "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
-        "WI": "Wisconsin", "WY": "Wyoming"
-    }
-
-    def get_color(value):
-        if value < 0 or value > 1:
-            raise ValueError("Value must be between 0 and 1.")
-        blue = int(value * 255)
-        red = int((0.98 - value) * 255)
-        return (red, 0, blue)
-    
-    def rgbToHex(rgb):
-        return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
-
-    def state_name(abbreviation):
-        return state_mapping.get(abbreviation, "Unknown State")
+   
 
     result = []
     
@@ -95,6 +109,7 @@ def get_votes():
         blue = mongo.get_candidate_percentage("Joe Biden", state)[0]
         color = rgbToHex(get_color(blue))
         result.append((state_name(state), color))
+        print(result)
         
     print(f"Result: {result}")
     
@@ -102,7 +117,7 @@ def get_votes():
     print(final)
     return jsonify(final)
 
-    return jsonify(feedparse.grab_feed(feeds))
+    # return jsonify(feedparse.grab_feed(feeds))
 
 @app.route("/get_summary")
 def get_summary():

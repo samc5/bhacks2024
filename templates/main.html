@@ -323,6 +323,7 @@
           .then(response => response.json())
       ])
       .then(([geoData, data]) => {
+        console.log("heyyy");
         console.log(geoData); // Log the states GeoJSON data
         console.log(data); // Log the votes data
 
@@ -348,44 +349,9 @@
     }
    
    // Fetch updates every 20 seconds (or however frequently you want)
-   setInterval(fetchUpdates, 10000);
-</script>
+//    setInterval(fetchUpdates, 10000);
+   setInterval(fetchVotes, 500000);
 
-<script>
-   function fetchVotes() {
-      return Promise.all([
-        fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
-          .then(response => response.json()),
-        fetch('/get_votes')
-          .then(response => response.json())
-      ])
-      .then(([geoData, data]) => {
-        console.log(geoData); // Log the states GeoJSON data
-        console.log(data); // Log the votes data
-
-        // Function to create styles based on state configurations
-        function styleStates(feature) {
-          var name = feature.properties.name; // Get the state name
-          for (var i = 0; i < data.length; i++) {
-            if (data[i][0] === name) { // Check if the state matches
-              return { color: data[i][1], weight: 1, fillOpacity: 0.9 }; // Return the style
-            }
-          }
-          return { fillColor: 'transparent', weight: 0 }; // Default style
-        }
-
-        // Add GeoJSON layer to the maps
-        L.geoJSON(geoData, { style: styleStates }).addTo(map);
-        L.geoJSON(geoData, { style: styleStates }).addTo(hawaiiMap);
-        L.geoJSON(geoData, { style: styleStates }).addTo(alaskaMap);
-
-        return data; // Return the data
-      })
-      .catch(err => console.error(err));
-    }
-   
-   // Fetch updates every 20 seconds (or however frequently you want)
-   setInterval(fetchVotes, 10000);
 </script>
 
 
