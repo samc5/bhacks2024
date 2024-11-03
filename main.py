@@ -70,7 +70,7 @@ def get_votes():
     result = []
     print(result)
     
-    for state in states:
+    for state in states[:5]:
         blue = mongo.get_candidate_percentage("Kamala Harris", state)[0]
         print(blue)
         

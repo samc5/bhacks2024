@@ -296,50 +296,42 @@
 
 <script>
    function fetchVotes() {
-      fetch('/get_votes')
-         .then(response => response.json())
-         .then(data => {
-            // Assuming data is an array of {state, color} objects
-            // Example: data = [{state: 'California', color: '#884ff2'}, {state: 'Texas', color: '#ff5733'}, ...]
+      Promise.all([
+               fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson')
+                  .then(response => response.json()),
+               fetch('/get_votes')
+                  .then(response => response.json())
+            ])
+            .then(([geoData, data]) => {
+               // Here you can access both countriesData and votesData
+               console.log(geoData); // Log the countries GeoJSON data
+               console.log(data); // Log the votes data
 
-            // Fetch the GeoJSON data for U.S. states
-            fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
-               .then(response => response.json())
-               .then(geoData => {
-                  // Function to create styles based on state configurations
-                  function getStyle(state) {
-                     const config = data.find(item => item.state === state);
-                     if (config) {
-                        return { color: config.color, weight: 1, fillOpacity: 0.9 };
-                     }
-                     return { fillColor: 'transparent', weight: 0 };
-                  }
+            // Fetch the GeoJSON data for U.S. stfetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
+    
+   
+        // Function to create styles based on state configurations
+                // Define a function to style states based on their names
+                function styleStates(feature) {
+                    var name = feature.properties.name; // Get the state name
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i][0] === name) { // Check if the state matches
+                            return { color: data[i][1], weight: 1, fillOpacity: 0.9 }; // Return the style
+                        }
+                    }
+                    return { fillColor: 'transparent', weight: 0 }; // Default style
+                }
+                
+                L.geoJSON(geoData, { style: styleStates }).addTo(map);
+                L.geoJSON(geoData, { style: styleStates }).addTo(hawaiiMap);
+                L.geoJSON(geoData, { style: styleStates }).addTo(alaskaMap);
 
-                  // Clear existing GeoJSON layers before adding new ones
-                  map.eachLayer(layer => {
-                     if (layer instanceof L.GeoJSON) {
-                        map.removeLayer(layer);
-                     }
-                  });
-                  alaskaMap.eachLayer(layer => {
-                     if (layer instanceof L.GeoJSON) {
-                        alaskaMap.removeLayer(layer);
-                     }
-                  });
-                  hawaiiMap.eachLayer(layer => {
-                     if (layer instanceof L.GeoJSON) {
-                        hawaiiMap.removeLayer(layer);
-                     }
-                  });
 
-                  // Add the new GeoJSON layers with updated styles
-                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(map);
-                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(hawaiiMap);
-                  L.geoJSON(geoData, { style: feature => getStyle(feature.properties.name) }).addTo(alaskaMap);
-               })
-               .catch(err => console.error(err));
-         })
-         .catch(err => console.error(err));
+
+        
+    })
+    .catch(err => console.error(err));
+
    }
   
    fetchVotes();
@@ -415,6 +407,7 @@
     fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json')
     .then(response => response.json())
     .then(data => {
+      console.log(data)
         // Define a function to style states based on their names
         function styleStates(feature) {
             const stateConfigurations = [{ state: 'California', color: '#884ff2' }];
