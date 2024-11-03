@@ -3,7 +3,8 @@ from flask import Flask, jsonify, request, render_template
 import tester
 import feedparse
 import json
-from collections import dequeimport mongo
+from collections import deque
+import mongo
 
 app = Flask(__name__)
 
