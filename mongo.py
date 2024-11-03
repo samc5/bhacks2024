@@ -2,7 +2,6 @@ from pymongo import MongoClient, ReturnDocument
 from datetime import datetime
 from dotenv import load_dotenv
 import os, json, requests
-from bson import ObjectId
 from mongoadd import *
 # set a string equal to the contents of mongodbpassword.txt
 load_dotenv()
@@ -103,6 +102,6 @@ def get_candidate_percentage(candidate_id, state):
     def get_candidate_proportion(votecount, totalcount):
         return round(abs((votecount[0] / totalcount)), 2) if totalcount != 0 else 0
 
-    return get_candidate_proportion(get_candidate_votes(candidate_id, state), get_total_votes(candidate_id, state)), state
+    return (get_candidate_proportion(get_candidate_votes(candidate_id, state), get_total_votes(candidate_id, state)), state)
 
 print(get_candidate_percentage('Kamala Harris', 'WY'))
